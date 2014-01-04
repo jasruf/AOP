@@ -4,7 +4,7 @@ public class Area {
 
 	private static Area instance;
 	private int[][] area;
-
+	
 	private Area(int size) {
 		super();
 		//Create new area
