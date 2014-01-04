@@ -4,13 +4,18 @@ public class Area {
 
 	private static Area instance;
 	private int[][] area;
-	
+	private int areaSize;
+
 	private Area(int size) {
 		super();
-		//Create new area
+
+		// Retain the size
+		areaSize = size;
+
+		// Create new area
 		this.area = new int[size][size];
-		for (int i = 0; i < size; i++){
-			for (int j = 0; j < size; j++){
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
 				area[i][j] = j;
 			}
 		}
@@ -23,8 +28,12 @@ public class Area {
 		}
 		return instance;
 	}
- 
+
 	public int[][] getArea() {
-		return getInstance().area;
+		return area;
+	}
+
+	public int getAreaSize() {
+		return areaSize;
 	}
 }
