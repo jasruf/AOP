@@ -37,8 +37,8 @@ public class DebrisBot extends Robot {
 				ACLMessage msg = blockingReceive();
 				if (msg != null) {
 					String[] msgContent = msg.getContent().split(" ");
-					targetLocation = new Location(Integer.valueOf(msgContent[0]),
-							Integer.valueOf(msgContent[1]));
+					targetLocation = new Location(Integer.valueOf(msgContent[1]),
+							Integer.valueOf(msgContent[2]));
 					System.out.println(getLocalName() + " moving to: X:" + targetLocation.getX()
 							+ ", Y: " + targetLocation.getY());
 					moveToLocation(targetLocation);

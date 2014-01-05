@@ -3,6 +3,7 @@ package agents;
 import jade.core.Agent;
 import main.Area;
 import main.Location;
+import main.Point;
 
 public class Robot extends Agent {
 
@@ -120,6 +121,22 @@ public class Robot extends Agent {
 			}
 		}
 		return false;
+	}
+
+	public Point getCurrentPoint() {
+		Point p;
+		Location loc;
+		for (int i = 0; i < area.getAreaSize(); i++) {
+			for (int j = 0; j < area.getAreaSize(); j++) {
+				p = area.getArea()[i][j];
+				loc = p.getLocation();
+				if (isSameLocation(loc, getCurrentLoc())) {
+					return p;
+				}
+
+			}
+		}
+		return null;
 	}
 
 	public Area getArea() {

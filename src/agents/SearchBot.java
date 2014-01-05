@@ -9,10 +9,9 @@ import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.lang.acl.ACLMessage;
 import main.Area;
 import main.Location;
+import main.Point;
 
 public class SearchBot extends Robot {
-
-	private static final int SLEEP_TIME = 1000;
 
 	private Object[] args;
 	private boolean done = false;
@@ -33,19 +32,18 @@ public class SearchBot extends Robot {
 
 			@Override
 			public boolean done() {
-				sendMessage("3 5");
 				System.out.println(getLocalName() + ": I'm Done!");
 				return done;
 			}
 
 			@Override
 			public void action() {
-				//Wait for the start signal
+				// Wait for the start signal
 				ACLMessage msg = blockingReceive();
 				if (msg != null) {
 					if (msg.getContent().equals(START_ACTION)) {
-						//Start scanning the target area
-						scanArea2('c', getCurrentLoc());
+						// Start scanning the target area
+						scanArea('c', getCurrentLoc());
 					}
 				}
 			}
@@ -55,95 +53,63 @@ public class SearchBot extends Robot {
 	/* Specific search bot methods */
 
 	private void foundVictim(Location l, Robot r) {
-		
+
 	}
 
-	private void areaSearched(Location beginLoc, Location endLoc) {
-	}
-
-	private void scanArea2(char subArea, Location curLoc) {
+	private void scanArea(char subArea, Location curLoc) {
 
 		int pointsChecked = 0;
 
+		//First scan
+		scanPoint(getCurrentPoint());
+		System.out.println("------------------------");
+		
 		// Repeat until end location is reached
 		while (pointsChecked != (getAreaSize() * getAreaSize() - 1)) {
+
 			if (checkRight()) {
 				moveRight();
-				System.out.println("------------------------");
 			} else if (checkLeft()) {
 				moveLeft();
-				System.out.println("------------------------");
 			} else if (checkUp()) {
 				moveUp();
-				System.out.println("------------------------");
 			} else if (checkDown()) {
 				moveDown();
-				System.out.println("------------------------");
 			}
 
 			// Update the current location
 			curLoc = getCurrentLoc();
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			
+			//Scan the new location
+			scanPoint(getCurrentPoint());
 
 			pointsChecked++;
+
+			System.out.println("------------------------");
 		}
 
 		System.out.println("X: " + curLoc.getX() + " Y:" + curLoc.getY());
 		done = true;
 	}
 
-	private void scanArea(char subArea, Location beginLoc, Location endLoc) {
-		int count = 0;
-		int beginX, endX, beginY, endY;
-		switch (subArea) {
-		case 'a':
-			for (int i = beginLoc.getX(); i < endLoc.getX(); i++) {
-				for (int j = beginLoc.getY(); j < endLoc.getY(); j++) {
-					scanPoint(new Location(i, j));
-					count++;
-				}
-			}
-			break;
-		case 'b':
-			for (int i = beginLoc.getX(); i > endLoc.getX(); i--) {
-				for (int j = beginLoc.getY(); j < endLoc.getY(); j++) {
-					scanPoint(new Location(i, j));
-					count++;
-				}
-			}
-			break;
-		case 'c':
-			for (int i = endLoc.getX(); i < beginLoc.getX(); i++) {
-				for (int j = endLoc.getY(); j > beginLoc.getY(); j--) {
-					scanPoint(new Location(i, j));
-					count++;
-				}
-			}
-			break;
-		case 'd':
-			for (int i = beginLoc.getX(); i > endLoc.getX(); i--) {
-				for (int j = beginLoc.getY(); j < endLoc.getY(); j++) {
-					scanPoint(new Location(i, j));
-					count++;
-				}
-			}
-			break;
+	private void scanPoint(Point p) {
+		System.out.println("Scanning: X: " + p.getLocation().getX() + " Y:" + p.getLocation().getY());
+		
+		// alert a debris bot it there's debris
+		if (p.isHasDebris()) {
+			System.out.println("Has debris");
+			alertDebrisBot();
+			return;
 		}
 
-		System.out.println("Searched " + count + " points");
+		// alert a transport bot if ther's a victim
+		if (p.isHasVictim()) {
+			System.out.println("Has victim");
+			alertTransportBot();
+		}
 	}
 
-	private void scanPoint(Location point) {
-		System.out.println("Scan point, X: " + point.getX() + ", Y: " + point.getY());
-		done = true;
-	}
-	
-	private void sendMessage(String message){
+	private void sendMessage(String message, String[] possibleReceipiants) {
 		AMSAgentDescription[] agents = null;
 
 		try {
@@ -153,28 +119,32 @@ public class SearchBot extends Robot {
 		} catch (FIPAException e) {
 			e.printStackTrace();
 		}
-		
-        AID receiver = null;
-        for (int i=0; i<agents.length;i++)
-        {
-            AID agentID = agents[i].getName();
-            if(agentID.getName().startsWith("d1")){
-            	receiver = agentID;
-            }
-        }
-		
+
+		//Decide where whom te receiver will be
+		AID receiver = null;
+		for (int i = 0; i < agents.length; i++) {
+			AID agentID = agents[i].getName();
+			//Check agent agains possible receipiants
+			for(String s : possibleReceipiants){
+				if(agentID.getName().startsWith(s)){
+					receiver = agentID;
+					break;
+				}
+			}
+		}
+
+		//Creat and send the message
 		ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
 		msg.setContent(message);
 		msg.addReceiver(receiver);
 		send(msg);
 	}
 
-	private void alertDebrisBot(Location l) {
+	private void alertTransportBot() {
+		sendMessage(String.valueOf(String.valueOf(getTargetArea()) + " " +getCurrentLoc().getX() +" " + String.valueOf(getCurrentLoc().getY())), new String[]{"d1", "d2", "d3", "d4"});
+	}
 
-
-		// ACLMessage msg = new ACLMessage(ACLMessage.INFORM);
-		// msg.setContentObject(l);
-		// msg.set
-		// AID dest = null;
+	private void alertDebrisBot() {
+		sendMessage(String.valueOf(String.valueOf(getTargetArea()) + " " +getCurrentLoc().getX() +" " + String.valueOf(getCurrentLoc().getY())), new String[]{"t1", "t2", "t3", "t4"});		
 	}
 }
