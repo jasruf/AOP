@@ -21,9 +21,9 @@ public class Area {
 			for (int j = 0; j < size; j++) {
 				if (j > 3) {
 					area[i][j] = new Point(new Location(i, j), rand.nextBoolean(),
-							rand.nextBoolean());
+							rand.nextBoolean(), false);
 				} else { //Remove the else later (this is for testing)
-					area[i][j] = new Point(new Location(i, j), false, false);
+					area[i][j] = new Point(new Location(i, j), false, false, false);
 				}
 			}
 		}

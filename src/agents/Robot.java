@@ -96,7 +96,8 @@ public class Robot extends Agent {
 		int targetX = to.getX(), targetY = to.getY();
 
 		while (!isSameLocation(currentLoc, to)) {
-			if (currentLoc.getX() < targetX) { // move right
+			if (currentLoc.getX() < targetX && pointIsExplored(to)) { // move
+																		// right
 				moveRight();
 			}
 
@@ -114,6 +115,14 @@ public class Robot extends Agent {
 		}
 	}
 
+	private boolean pointIsExplored(Location to) {
+		Point p = getPointAt(to);
+		if (p.isExplored()) {
+			return true;
+		}
+		return false;
+	}
+
 	protected boolean isSameLocation(Location newLoc, Location oldLoc) {
 		if (oldLoc != null) {
 			if (newLoc.getX() == oldLoc.getX() && newLoc.getY() == oldLoc.getY()) {
@@ -123,9 +132,26 @@ public class Robot extends Agent {
 		return false;
 	}
 
+	// Very inefficient, should switch over to keeping track on which point the
+	// robot is, not the location
 	public Point getCurrentPoint() {
 		Point p;
 		Location loc;
+		for (int i = 0; i < area.getAreaSize(); i++) {
+			for (int j = 0; j < area.getAreaSize(); j++) {
+				p = area.getArea()[i][j];
+				loc = p.getLocation();
+				if (isSameLocation(loc, getCurrentLoc())) {
+					return p;
+				}
+
+			}
+		}
+		return null;
+	}
+
+	public Point getPointAt(Location loc) {
+		Point p;
 		for (int i = 0; i < area.getAreaSize(); i++) {
 			for (int j = 0; j < area.getAreaSize(); j++) {
 				p = area.getArea()[i][j];

@@ -53,7 +53,6 @@ public class SearchBot extends Robot {
 	/* Specific search bot methods */
 
 	private void foundVictim(Location l, Robot r) {
-
 	}
 
 	private void scanArea(char subArea, Location curLoc) {
@@ -95,6 +94,9 @@ public class SearchBot extends Robot {
 	private void scanPoint(Point p) {
 		System.out.println("Scanning: X: " + p.getLocation().getX() + " Y:" + p.getLocation().getY());
 		
+		//Point is now explored
+		p.setExplored(true);
+
 		// alert a debris bot it there's debris
 		if (p.isHasDebris()) {
 			System.out.println("Has debris");
@@ -102,7 +104,7 @@ public class SearchBot extends Robot {
 			return;
 		}
 
-		// alert a transport bot if ther's a victim
+		// alert a transport bot if there's a victim
 		if (p.isHasVictim()) {
 			System.out.println("Has victim");
 			alertTransportBot();
@@ -140,11 +142,11 @@ public class SearchBot extends Robot {
 		send(msg);
 	}
 
-	private void alertTransportBot() {
+	private void alertDebrisBot() {
 		sendMessage(String.valueOf(String.valueOf(getTargetArea()) + " " +getCurrentLoc().getX() +" " + String.valueOf(getCurrentLoc().getY())), new String[]{"d1", "d2", "d3", "d4"});
 	}
 
-	private void alertDebrisBot() {
+	private void alertTransportBot() {
 		sendMessage(String.valueOf(String.valueOf(getTargetArea()) + " " +getCurrentLoc().getX() +" " + String.valueOf(getCurrentLoc().getY())), new String[]{"t1", "t2", "t3", "t4"});		
 	}
 }
