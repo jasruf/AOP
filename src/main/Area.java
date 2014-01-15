@@ -19,12 +19,8 @@ public class Area {
 		this.area = new Point[size][size];
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				if (j > 3) {
-					area[i][j] = new Point(new Location(i, j), rand.nextBoolean(),
-							rand.nextBoolean(), false);
-				} else { //Remove the else later (this is for testing)
-					area[i][j] = new Point(new Location(i, j), false, false, false);
-				}
+				area[i][j] = new Point(new Location(i, j), rand.nextBoolean(), rand.nextBoolean(),
+						false);
 			}
 		}
 	}
@@ -32,7 +28,7 @@ public class Area {
 	public static Area getInstance() {
 		if (instance == null) {
 			// Create a 20 by 20 area
-			instance = new Area(20);
+			instance = new Area(5);
 		}
 		return instance;
 	}

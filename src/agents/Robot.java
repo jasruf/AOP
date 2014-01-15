@@ -1,6 +1,8 @@
 package agents;
 
+import jade.core.AID;
 import jade.core.Agent;
+import jade.lang.acl.ACLMessage;
 import main.Area;
 import main.Location;
 import main.Point;
@@ -24,39 +26,39 @@ public class Robot extends Agent {
 		previousLoc = new Location(currentLoc.getX(), currentLoc.getY());
 		currentLoc.setX(currentLoc.getX() + 1);
 
-		System.out.println("pX: " + previousLoc.getX() + " pY:" + previousLoc.getY());
-		System.out.println("X: " + currentLoc.getX() + " Y:" + currentLoc.getY());
+		System.out.println(getLocalName() + ": X: " + currentLoc.getX() + " Y: "
+				+ currentLoc.getY());
 	}
 
 	protected void moveLeft() {
 		previousLoc = new Location(currentLoc.getX(), currentLoc.getY());
 		currentLoc.setX(currentLoc.getX() - 1);
 
-		System.out.println("pX: " + previousLoc.getX() + " pY:" + previousLoc.getY());
-		System.out.println("X: " + currentLoc.getX() + " Y:" + currentLoc.getY());
+		System.out.println(getLocalName() + ": X: " + currentLoc.getX() + " Y: "
+				+ currentLoc.getY());
 	}
 
 	protected void moveUp() {
 		previousLoc = new Location(currentLoc.getX(), currentLoc.getY());
 		currentLoc.setY(currentLoc.getY() + 1);
 
-		System.out.println("pX: " + previousLoc.getX() + " pY:" + previousLoc.getY());
-		System.out.println("X: " + currentLoc.getX() + " Y:" + currentLoc.getY());
+		System.out.println(getLocalName() + ": X: " + currentLoc.getX() + " Y: "
+				+ currentLoc.getY());
 	}
 
 	protected void moveDown() {
 		previousLoc = new Location(currentLoc.getX(), currentLoc.getY());
 		currentLoc.setY(currentLoc.getY() - 1);
 
-		System.out.println("pX: " + previousLoc.getX() + " pY:" + previousLoc.getY());
-		System.out.println("X: " + currentLoc.getX() + " Y:" + currentLoc.getY());
+		System.out.println(getLocalName() + ": X: " + currentLoc.getX() + " Y: "
+				+ currentLoc.getY());
 	}
 
 	protected boolean checkRight() {
 		// check if bot can move to the right
 		Location newLoc = new Location(currentLoc.getX() + 1, currentLoc.getY());
 		if (newLoc.getX() < areaSize && !isSameLocation(newLoc, previousLoc)) {
-			System.out.println("Going right");
+			System.out.println(getLocalName() + ": Going right");
 			return true;
 		}
 		return false;
@@ -66,7 +68,7 @@ public class Robot extends Agent {
 		// check if bot can move to the left
 		Location newLoc = new Location(currentLoc.getX() - 1, currentLoc.getY());
 		if (newLoc.getX() >= 0 && !isSameLocation(newLoc, previousLoc)) {
-			System.out.println("Going left");
+			System.out.println(getLocalName() + ": Going left");
 			return true;
 		}
 		return false;
@@ -76,7 +78,7 @@ public class Robot extends Agent {
 		// check if bot can move up
 		Location newLoc = new Location(currentLoc.getX(), currentLoc.getY() + 1);
 		if (newLoc.getY() < areaSize && !isSameLocation(newLoc, previousLoc)) {
-			System.out.println("Going up");
+			System.out.println(getLocalName() + ": Going up");
 			return true;
 		}
 		return false;
@@ -86,7 +88,7 @@ public class Robot extends Agent {
 		// check if bot can move down
 		Location newLoc = new Location(currentLoc.getX(), currentLoc.getY() - 1);
 		if (newLoc.getY() >= 0 && !isSameLocation(newLoc, previousLoc)) {
-			System.out.println("Going down");
+			System.out.println(getLocalName() + ": Going down");
 			return true;
 		}
 		return false;
@@ -94,30 +96,33 @@ public class Robot extends Agent {
 
 	protected void moveToLocation(Location to) {
 		int targetX = to.getX(), targetY = to.getY();
+		Location compareLoc;
 
 		while (!isSameLocation(currentLoc, to)) {
-			if (currentLoc.getX() < targetX && pointIsExplored(to)) { // move
-																		// right
+			compareLoc = new Location(currentLoc.getX() + 1, currentLoc.getY());
+			if (currentLoc.getX() < targetX && pointIsExplored(compareLoc)) {
 				moveRight();
 			}
 
-			if (currentLoc.getX() > targetX) { // move left
+			compareLoc = new Location(currentLoc.getX() -1, currentLoc.getY());
+			if (currentLoc.getX() > targetX && pointIsExplored(compareLoc)) {
 				moveLeft();
 			}
 
-			if (currentLoc.getY() < targetY) { // move up
+			compareLoc = new Location(currentLoc.getX(), currentLoc.getY() +1);
+			if (currentLoc.getY() < targetY && pointIsExplored(compareLoc)) {
 				moveUp();
-			}
+			} 
 
-			if (currentLoc.getY() > targetY) { // move down
+			compareLoc = new Location(currentLoc.getX(), currentLoc.getY()-1);
+			if (currentLoc.getY() > targetY && pointIsExplored(compareLoc)) {
 				moveDown();
 			}
 		}
 	}
 
 	private boolean pointIsExplored(Location to) {
-		Point p = getPointAt(to);
-		if (p.isExplored()) {
+		if (getPointAt(to).isExplored()) {
 			return true;
 		}
 		return false;
@@ -133,7 +138,7 @@ public class Robot extends Agent {
 	}
 
 	// Very inefficient, should switch over to keeping track on which point the
-	// robot is, not the location
+	// robot is at, not the location
 	public Point getCurrentPoint() {
 		Point p;
 		Location loc;
@@ -156,13 +161,20 @@ public class Robot extends Agent {
 			for (int j = 0; j < area.getAreaSize(); j++) {
 				p = area.getArea()[i][j];
 				loc = p.getLocation();
-				if (isSameLocation(loc, getCurrentLoc())) {
+				if (isSameLocation(loc, p.getLocation())) {
 					return p;
 				}
 
 			}
 		}
 		return null;
+	}
+
+	public void sendMessage(AID receiver, String message, int messageType) {
+		ACLMessage msg = new ACLMessage(messageType);
+		msg.setContent(message);
+		msg.addReceiver(receiver);
+		send(msg);
 	}
 
 	public Area getArea() {
