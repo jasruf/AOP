@@ -6,7 +6,7 @@ import main.Area;
 import main.Location;
 
 public class TransportBot extends Robot {
-	
+
 	private Object[] args;
 	private Location targetLocation;
 	private Location startingLocation;
@@ -20,12 +20,12 @@ public class TransportBot extends Robot {
 		// Setup area and location
 		args = getArguments();
 		setTargetArea(((String) args[0]).charAt(0));
-		setCurrentLoc(new Location(Integer.valueOf((String) args[1]),
-				Integer.valueOf((String) args[2])));
+		setArea(Area.getInstance().getArea(getTargetArea()));
+		setAreaSize(Area.getInstance().getAreaSize());
+		setCurrentPoint(getPointAt(new Location(Integer.valueOf((String) args[1]),
+				Integer.valueOf((String) args[2]))));
 		startingLocation = new Location(Integer.valueOf((String) args[1]),
 				Integer.valueOf((String) args[2]));
-		setArea(Area.getInstance());
-		setAreaSize(getArea().getAreaSize());
 
 		addBehaviour(new CyclicBehaviour(this) {
 
@@ -39,13 +39,13 @@ public class TransportBot extends Robot {
 			}
 		});
 	}
-	
+
 	/* Specific transport bot methods */
 
 	private void loadVictim() {
 		victimCount++;
 	}
-	
+
 	private void communicate(ACLMessage msg) {
 		switch (msg.getPerformative()) {
 		case ACLMessage.CFP:

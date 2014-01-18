@@ -1,9 +1,5 @@
 package agents;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import jade.core.AID;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.AMSService;
@@ -11,6 +7,11 @@ import jade.domain.FIPAException;
 import jade.domain.FIPAAgentManagement.AMSAgentDescription;
 import jade.domain.FIPAAgentManagement.SearchConstraints;
 import jade.lang.acl.ACLMessage;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import main.Area;
 import main.Location;
 import main.Point;
@@ -28,12 +29,14 @@ public class SearchBot extends Robot {
 		// Setup area and location
 		args = getArguments();
 		setTargetArea(((String) args[0]).charAt(0));
-		setCurrentLoc(new Location(Integer.valueOf((String) args[1]),
-				Integer.valueOf((String) args[2])));
+		setArea(Area.getInstance().getArea(getTargetArea()));
+		setAreaSize(Area.getInstance().getAreaSize());
+		setLimits();
+		setCurrentPoint(getPointAt(new Location(Integer.valueOf((String) args[1]),
+				Integer.valueOf((String) args[2]))));
+		setPreviousPoint(new Point(new Location(-1, -1), false, false, false));
 		startingLocation = new Location(Integer.valueOf((String) args[1]),
 				Integer.valueOf((String) args[2]));
-		setArea(Area.getInstance());
-		setAreaSize(getArea().getAreaSize());
 
 		addBehaviour(new SimpleBehaviour(this) {
 
@@ -51,7 +54,7 @@ public class SearchBot extends Robot {
 				if (msg != null) {
 					if (msg.getContent().equals(START_ACTION)) {
 						// Start scanning the target area
-						scanArea('c', getCurrentLoc());
+						scanArea();
 					}
 				}
 			}
@@ -60,32 +63,65 @@ public class SearchBot extends Robot {
 
 	/* Specific search bot methods */
 
-	private void foundVictim(Location l, Robot r) {
-	}
-
-	private void scanArea(char subArea, Location curLoc) {
+	private void scanArea() {
 
 		int pointsChecked = 0;
 
 		// First scan
+		System.out.println("------------------------");
 		scanPoint(getCurrentPoint());
 		System.out.println("------------------------");
 
 		// Repeat until end location is reached
 		while (pointsChecked != (getAreaSize() * getAreaSize() - 1)) {
 
-			if (checkRight()) {
-				moveRight();
-			} else if (checkLeft()) {
-				moveLeft();
-			} else if (checkUp()) {
-				moveUp();
-			} else if (checkDown()) {
-				moveDown();
+			// Have different search patterns for each area
+			switch (getTargetArea()) {
+			case 'a':
+				if (checkRight()) {
+					moveRight();
+				} else if (checkLeft()) {
+					moveLeft();
+				} else if (checkUp()) {
+					moveUp();
+				} else if (checkDown()) {
+					moveDown();
+				}
+				break;
+			case 'b':
+				if (checkLeft()) {
+					moveLeft();
+				} else if (checkRight()) {
+					moveRight();
+				} else if (checkUp()) {
+					moveUp();
+				} else if (checkDown()) {
+					moveDown();
+				}
+				break;
+			case 'c':
+				if (checkRight()) {
+					moveRight();
+				} else if (checkLeft()) {
+					moveLeft();
+				} else if (checkDown()) {
+					moveDown();
+				} else if (checkUp()) {
+					moveUp();
+				}
+				break;
+			case 'd':
+				if (checkLeft()) {
+					moveLeft();
+				} else if (checkRight()) {
+					moveRight();
+				} else if (checkDown()) {
+					moveDown();
+				} else if (checkUp()) {
+					moveUp();
+				}
+				break;
 			}
-
-			// Update the current location
-			curLoc = getCurrentLoc();
 
 			// Scan the new location
 			scanPoint(getCurrentPoint());
@@ -109,8 +145,9 @@ public class SearchBot extends Robot {
 		if (p.isHasDebris()) {
 			System.out.println(getLocalName() + ": Has debris");
 			contactDebrisBot(
-					String.valueOf(String.valueOf(getTargetArea()) + " " + getCurrentLoc().getX()
-							+ " " + String.valueOf(getCurrentLoc().getY())),
+					String.valueOf(String.valueOf(getTargetArea()) + " "
+							+ getCurrentPoint().getLocation().getX() + " "
+							+ String.valueOf(getCurrentPoint().getLocation().getY())),
 					Arrays.asList(new String[] { "d1", "d2", "d3", "d4" }));
 		}
 
@@ -118,8 +155,9 @@ public class SearchBot extends Robot {
 		if (p.isHasVictim()) {
 			System.out.println(getLocalName() + ": Has victim");
 			contactTransportBot(
-					String.valueOf(String.valueOf(getTargetArea()) + " " + getCurrentLoc().getX()
-							+ " " + String.valueOf(getCurrentLoc().getY())),
+					String.valueOf(String.valueOf(getTargetArea()) + " "
+							+ getCurrentPoint().getLocation().getX() + " "
+							+ String.valueOf(getCurrentPoint().getLocation().getY())),
 					Arrays.asList(new String[] { "t1", "t2", "t3", "t4" }));
 		}
 	}
@@ -269,5 +307,34 @@ public class SearchBot extends Robot {
 				}
 			}
 		}
+	}
+
+	// Method to get the edge values for the area
+	private void setLimits() {
+		int right = 0, left = 0, up = 0, down = 0, x, y;
+		Point p;
+
+		for (int i = 0; i < getAreaSize(); i++) {
+			for (int j = 0; j < getAreaSize(); j++) {
+				p = getArea()[i][j];
+				x = p.getLocation().getX();
+				y = p.getLocation().getY();
+
+				if (x > right) {
+					right = x;
+				}
+
+				if (y > up) {
+					up = y;
+				}
+			}
+		}
+		left = right - (getAreaSize() - 1);
+		down = up - (getAreaSize() - 1);
+
+		setLimitRight(right);
+		setLimitLeft(left);
+		setLimitUp(up);
+		setLimitDown(down);
 	}
 }

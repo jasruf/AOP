@@ -6,12 +6,13 @@ import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import main.Area;
 import main.Location;
+import main.Point;
 
 public class DebrisBot extends Robot {
 
 	private Object[] args;
-	private Location targetLocation;
 	private Location startingLocation;
+	private Location targetLocation;
 	private boolean isWorking = false;
 
 	protected void setup() {
@@ -21,12 +22,12 @@ public class DebrisBot extends Robot {
 		// Setup area and location
 		args = getArguments();
 		setTargetArea(((String) args[0]).charAt(0));
-		setCurrentLoc(new Location(Integer.valueOf((String) args[1]),
-				Integer.valueOf((String) args[2])));
+		setArea(Area.getInstance().getArea(getTargetArea()));
+		setAreaSize(Area.getInstance().getAreaSize());
+		setCurrentPoint(getPointAt(new Location(Integer.valueOf((String) args[1]),
+				Integer.valueOf((String) args[2]))));
 		startingLocation = new Location(Integer.valueOf((String) args[1]),
 				Integer.valueOf((String) args[2]));
-		setArea(Area.getInstance());
-		setAreaSize(getArea().getAreaSize());
 
 		addBehaviour(new CyclicBehaviour() {
 
@@ -64,7 +65,7 @@ public class DebrisBot extends Robot {
 			System.out.println(getLocalName() + ": moving to: X:" + targetLocation.getX() + ", Y: "
 					+ targetLocation.getY());
 			moveToLocation(targetLocation);
-			clearDebris(getCurrentLoc());
+			clearDebris(getCurrentPoint().getLocation());
 			System.out.println(getLocalName() + ": Cleared debris, inform searchbot");
 
 			// Inform the searchbot it's done
