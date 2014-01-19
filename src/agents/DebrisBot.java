@@ -47,7 +47,7 @@ public class DebrisBot extends Robot {
 	private void communicate(ACLMessage msg) {
 		switch (msg.getPerformative()) {
 		case ACLMessage.CFP:
-			if (isWorking) {
+			if (isWorking || msg.getContent().charAt(0) != getTargetArea()) {
 				// We're already doing something, refusing
 				sendMessage(msg.getSender(), null, ACLMessage.REFUSE);
 				System.out.println(getLocalName() + ": Refusing work");
@@ -65,7 +65,7 @@ public class DebrisBot extends Robot {
 			System.out.println(getLocalName() + ": moving to: X:" + targetLocation.getX() + ", Y: "
 					+ targetLocation.getY());
 			moveToLocation(targetLocation);
-			clearDebris(getCurrentPoint().getLocation());
+			clearDebris();
 			System.out.println(getLocalName() + ": Cleared debris, inform searchbot");
 
 			// Inform the searchbot it's done
@@ -74,15 +74,10 @@ public class DebrisBot extends Robot {
 			isWorking = false;
 			break;
 		}
-
+ 
 	}
 
-	private void alertTransportBot(Location l) {
-
+	private void clearDebris() {
+		getCurrentPoint().setHasDebris(false);
 	}
-
-	private void clearDebris(Location l) {
-
-	}
-
 }

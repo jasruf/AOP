@@ -1,6 +1,7 @@
 package agents;
 
 import jade.core.AID;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.SimpleBehaviour;
 import jade.domain.AMSService;
 import jade.domain.FIPAException;
@@ -38,14 +39,14 @@ public class SearchBot extends Robot {
 		startingLocation = new Location(Integer.valueOf((String) args[1]),
 				Integer.valueOf((String) args[2]));
 
-		addBehaviour(new SimpleBehaviour(this) {
+		addBehaviour(new CyclicBehaviour(this) {
 
-			@Override
-			public boolean done() {
-				moveToLocation(startingLocation);
-				System.out.println(getLocalName() + ": I'm Done!");
-				return done;
-			}
+//			@Override
+//			public boolean done() {
+//				moveToLocation(startingLocation);
+//				System.out.println(getLocalName() + ": I'm Done!");
+//				return done;
+//			}
 
 			@Override
 			public void action() {
@@ -55,6 +56,7 @@ public class SearchBot extends Robot {
 					if (msg.getContent().equals(START_ACTION)) {
 						// Start scanning the target area
 						scanArea();
+						moveToLocation(startingLocation);
 					}
 				}
 			}
@@ -213,7 +215,7 @@ public class SearchBot extends Robot {
 				// Create and send the message
 				System.out.println(getLocalName() + ": Start communication with transportbot ("
 						+ receiver.getLocalName() + ")");
-				sendMessage(receiver, null, ACLMessage.CFP);
+				sendMessage(receiver, String.valueOf(getTargetArea()), ACLMessage.CFP);
 				ACLMessage msg = blockingReceive();
 				if (msg.getPerformative() == ACLMessage.PROPOSE) {
 					// Send reply that bot can start work
@@ -279,8 +281,8 @@ public class SearchBot extends Robot {
 			}
 
 			if (receiver != null) {
-				// Create and send the message
-				sendMessage(receiver, null, ACLMessage.CFP);
+				// Create and send the message with the target area
+				sendMessage(receiver, String.valueOf(getTargetArea()), ACLMessage.CFP);
 				System.out.println(getLocalName() + ": Start communication with debrisbot ("
 						+ receiver.getLocalName() + ")");
 				ACLMessage msg = blockingReceive();

@@ -44,12 +44,13 @@ public class TransportBot extends Robot {
 
 	private void loadVictim() {
 		victimCount++;
+		getCurrentPoint().setHasVictim(false);
 	}
 
 	private void communicate(ACLMessage msg) {
 		switch (msg.getPerformative()) {
 		case ACLMessage.CFP:
-			if (isWorking) {
+			if (isWorking || msg.getContent().charAt(0) != getTargetArea()) {
 				// We're already doing something, refusing
 				sendMessage(msg.getSender(), null, ACLMessage.REFUSE);
 				System.out.println(getLocalName() + ": Refusing work");
