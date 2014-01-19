@@ -1,12 +1,9 @@
 package agents;
 
-import jade.core.AID;
 import jade.core.behaviours.CyclicBehaviour;
-import jade.core.behaviours.SimpleBehaviour;
 import jade.lang.acl.ACLMessage;
 import main.Area;
 import main.Location;
-import main.Point;
 
 public class DebrisBot extends Robot {
 
